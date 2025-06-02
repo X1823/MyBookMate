@@ -1,16 +1,54 @@
 package com.example.my.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+
+// 数据类
+data class RecommendedBook(val title: String, val author: String, val description: String)
+
+// 推荐书单
+val recommendations = listOf(
+    RecommendedBook("One Hundred Years of Solitude", "Gabriel García Márquez", "The loneliness and fate of seven generations of people in Macondo are intertwined, showing the charm of magical realism."),
+    RecommendedBook("The Red and the Black", "Stendhal", "Young Julien struggles between love and power, reflecting the social contradictions in France in the 19th century."),
+    RecommendedBook("The Narrow Gate", "André Gide", "A story full of abstinence and idealized love, exploring the conflict between soul and desire."),
+    RecommendedBook("The Kite Runner", "Khaled Hosseini", "A touching story about redemption and friendship, spanning the war in Afghanistan and the suffering of life.")
+)
 
 @Composable
 fun RecommendScreen(modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(16.dp)) {
-        Text("Book Recommendations", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Book Recommendations",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Coming soon...", style = MaterialTheme.typography.bodyLarge)
+
+        LazyColumn {
+            items(recommendations) { book ->
+                Card(
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(book.title, style = MaterialTheme.typography.titleMedium)
+                        Text("by ${book.author}", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(book.description, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
     }
 }
+
