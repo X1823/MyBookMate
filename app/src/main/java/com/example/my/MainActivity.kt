@@ -3,6 +3,7 @@ package com.example.my
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -10,15 +11,21 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.example.my.ui.theme.MyTheme
 import com.example.my.screens.*
 
 class MainActivity : ComponentActivity() {
+
+    private val bookViewModel: BookViewModel by viewModels {
+        val database = AppDatabase.getDatabase(applicationContext)
+        val repository = BookRepository(database.bookDao())
+        BookViewModelFactory(repository)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             MyTheme {
                 var selectedTab by remember { mutableStateOf(0) }
@@ -48,12 +55,12 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     when (selectedTab) {
-                        0 -> LibraryScreen(Modifier.padding(innerPadding))
+                        0 -> LibraryScreen(bookViewModel, Modifier.padding(innerPadding))
                         1 -> RecommendScreen(Modifier.padding(innerPadding))
                         2 -> MyPageScreen(Modifier.padding(innerPadding))
                     }
                 }
             }
         }
-    }
-}
+    } // 👈 加回来的括号
+} // 👈 加回来的括号
