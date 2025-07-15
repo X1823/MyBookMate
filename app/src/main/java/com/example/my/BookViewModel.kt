@@ -2,31 +2,23 @@ package com.example.my
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.LiveData
 import kotlinx.coroutines.launch
 
 class BookViewModel(private val repository: BookRepository) : ViewModel() {
 
-    private val _books = MutableStateFlow<List<Book>>(emptyList())
-    val books: StateFlow<List<Book>> = _books.asStateFlow()
+    val allBooks: LiveData<List<Book>> = repository.getAllBooks()
 
-    init {
-        loadBooks()
-    }
-
-    private fun loadBooks() {
+    fun insertBook(title: String, author: String, progress: Int, copy: String, note: String) {
         viewModelScope.launch {
-            repository.getAllBooks().collect {
-                _books.value = it
-            }
+            val book = Book(title = title, author = author, progress = progress, copy = copy, note = note)
+            repository.insertBook(book)
         }
     }
 
-    fun addBook(book: Book) {
+    fun updateBook(book: Book) {
         viewModelScope.launch {
-            repository.insertBook(book)
+            repository.updateBook(book)
         }
     }
 
@@ -36,11 +28,9 @@ class BookViewModel(private val repository: BookRepository) : ViewModel() {
         }
     }
 
-    fun updateProgress(book: Book, newProgress: Float) {
-        val updatedBook = book.copy(progress = newProgress)
+    fun clearBooks() {
         viewModelScope.launch {
-            repository.updateBook(updatedBook)
+            repository.clearBooks()
         }
     }
 }
-

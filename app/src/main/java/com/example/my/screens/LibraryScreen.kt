@@ -1,136 +1,119 @@
 package com.example.my.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.livedata.observeAsState
 import com.example.my.Book
 import com.example.my.BookViewModel
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun LibraryScreen(
-    bookViewModel: BookViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bookViewModel: BookViewModel = viewModel()
 ) {
-    var showAddDialog by remember { mutableStateOf(false) }
-    var showDetailDialog by remember { mutableStateOf(false) }
-    var selectedBook by remember { mutableStateOf<Book?>(null) }
+    val bookList by bookViewModel.allBooks.observeAsState(initial = emptyList())
 
-    var newTitle by remember { mutableStateOf("") }
-    var newAuthor by remember { mutableStateOf("") }
-    var newProgress by remember { mutableStateOf(0f) }
+    var newTitle by remember { mutableStateOf(TextFieldValue("")) }
+    var newAuthor by remember { mutableStateOf(TextFieldValue("")) }
+    var newProgress by remember { mutableStateOf(TextFieldValue("")) }
+    var newCopy by remember { mutableStateOf(TextFieldValue("")) }
+    var newNote by remember { mutableStateOf(TextFieldValue("")) }
 
-    val books by bookViewModel.books.collectAsState()
+    Column(modifier = modifier.padding(16.dp)) {
+        Text("Library", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
 
-    Box(modifier = modifier.fillMaxSize().padding(16.dp)) {
-        Column {
-            Text("My Library", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(16.dp))
+        OutlinedTextField(
+            value = newTitle,
+            onValueChange = { newTitle = it },
+            label = { Text("Title") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = newAuthor,
+            onValueChange = { newAuthor = it },
+            label = { Text("Author") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = newProgress,
+            onValueChange = { newProgress = it },
+            label = { Text("Progress") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = newCopy,
+            onValueChange = { newCopy = it },
+            label = { Text("Copy Info") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = newNote,
+            onValueChange = { newNote = it },
+            label = { Text("Note") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-            Button(onClick = { showAddDialog = true }) {
-                Text("Add Book")
-            }
+        Button(
+            onClick = {
+                val progressInt = newProgress.text.toIntOrNull() ?: 0
+                bookViewModel.insertBook(
+                    title = newTitle.text,
+                    author = newAuthor.text,
+                    progress = progressInt,
+                    copy = newCopy.text,
+                    note = newNote.text
+                )
+                newTitle = TextFieldValue("")
+                newAuthor = TextFieldValue("")
+                newProgress = TextFieldValue("")
+                newCopy = TextFieldValue("")
+                newNote = TextFieldValue("")
+            },
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            Text("Add Book")
+        }
 
-            Spacer(Modifier.height(16.dp))
+        Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-            books.forEach { book ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable {
-                            selectedBook = book
-                            newProgress = book.progress
-                            showDetailDialog = true
-                        },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFECEFF1))
+        bookList.forEach { book ->
+            Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                Text("${book.title} by ${book.author} (${book.progress}%)\nCopy: ${book.copy}\nNote: ${book.note}")
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Title: ${book.title}", fontWeight = FontWeight.Bold)
-                        Text("Author: ${book.author}")
-                        Text("Progress: ${book.progress}%")
-                    }
-                }
-            }
-        }
-
-        // 添加书籍对话框
-        if (showAddDialog) {
-            AlertDialog(
-                onDismissRequest = { showAddDialog = false },
-                confirmButton = {
                     Button(onClick = {
-                        bookViewModel.addBook(
-                            Book(title = newTitle, author = newAuthor, progress = newProgress)
-                        )
-                        showAddDialog = false
-                        newTitle = ""
-                        newAuthor = ""
-                        newProgress = 0f
-                    }) {
-                        Text("Save")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showAddDialog = false }) {
-                        Text("Cancel")
-                    }
-                },
-                title = { Text("Add Book") },
-                text = {
-                    Column {
-                        OutlinedTextField(value = newTitle, onValueChange = { newTitle = it }, label = { Text("Title") })
-                        OutlinedTextField(value = newAuthor, onValueChange = { newAuthor = it }, label = { Text("Author") })
-                        OutlinedTextField(value = newProgress.toString(), onValueChange = {
-                            newProgress = it.toFloatOrNull() ?: 0f
-                        }, label = { Text("Progress (%)") })
-                    }
-                }
-            )
-        }
-
-        // 详情对话框
-        if (showDetailDialog && selectedBook != null) {
-            AlertDialog(
-                onDismissRequest = { showDetailDialog = false },
-                confirmButton = {
-                    Button(onClick = {
-                        bookViewModel.updateProgress(selectedBook!!, newProgress)
-                        showDetailDialog = false
-                    }) {
-                        Text("Update")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        bookViewModel.deleteBook(selectedBook!!)
-                        showDetailDialog = false
+                        bookViewModel.deleteBook(book)
                     }) {
                         Text("Delete")
                     }
-                },
-                title = { Text("Book Details") },
-                text = {
-                    Column {
-                        Text("Title: ${selectedBook!!.title}")
-                        Text("Author: ${selectedBook!!.author}")
-                        OutlinedTextField(
-                            value = newProgress.toString(),
-                            onValueChange = { newProgress = it.toFloatOrNull() ?: 0f },
-                            label = { Text("Progress (%)") }
+
+                    Button(onClick = {
+                        val updatedProgress = newProgress.text.toIntOrNull() ?: book.progress
+                        val updatedBook = book.copy(
+                            title = newTitle.text,
+                            author = newAuthor.text,
+                            progress = updatedProgress,
+                            copy = newCopy.text,
+                            note = newNote.text
                         )
+                        bookViewModel.updateBook(updatedBook)
+                    }) {
+                        Text("Update")
                     }
                 }
-            )
+
+                Divider(modifier = Modifier.padding(vertical = 8.dp))
+            }
         }
     }
 }

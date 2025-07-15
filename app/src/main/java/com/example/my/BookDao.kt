@@ -1,19 +1,23 @@
 package com.example.my
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BookDao {
-    @Query("SELECT * FROM books")
-    fun getAllBooks(): Flow<List<Book>>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBook(book: Book)
+    fun insertBook(book: Book)
 
     @Update
-    suspend fun updateBook(book: Book)
+    fun updateBook(book: Book)
 
     @Delete
-    suspend fun deleteBook(book: Book)
+    fun deleteBook(book: Book)
+
+    @Query("DELETE FROM book_table")
+    fun clearBooks()
+
+    @Query("SELECT * FROM book_table ORDER BY id DESC")
+    fun getAllBooks(): LiveData<List<Book>>
 }
+

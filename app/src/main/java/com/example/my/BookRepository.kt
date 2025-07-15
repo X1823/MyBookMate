@@ -1,25 +1,25 @@
 package com.example.my
 
-import com.example.my.Book
-
-import kotlinx.coroutines.flow.Flow
+import androidx.lifecycle.LiveData
 
 class BookRepository(private val bookDao: BookDao) {
-
-    fun getAllBooks(): Flow<List<Book>> {
-        return bookDao.getAllBooks()
-    }
-
-    suspend fun insertBook(book: Book) {
+    fun insertBook(book: Book) {
         bookDao.insertBook(book)
     }
 
-    suspend fun deleteBook(book: Book) {
+    fun updateBook(book: Book) {
+        bookDao.updateBook(book)
+    }
+
+    fun deleteBook(book: Book) {
         bookDao.deleteBook(book)
     }
 
-    suspend fun updateBook(book: Book) {
-        bookDao.updateBook(book)
+    fun clearBooks() {
+        bookDao.clearBooks()
+    }
+
+    fun getAllBooks(): LiveData<List<Book>> {
+        return bookDao.getAllBooks()
     }
 }
-
