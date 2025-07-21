@@ -3,23 +3,23 @@ package com.example.my
 import androidx.lifecycle.LiveData
 
 class BookRepository(private val bookDao: BookDao) {
-    fun insertBook(book: Book) {
-        bookDao.insertBook(book)
+
+    val allBooks: LiveData<List<Book>> = bookDao.getAllBooks()
+
+    suspend fun insert(book: Book) {
+        bookDao.insert(book)
     }
 
-    fun updateBook(book: Book) {
-        bookDao.updateBook(book)
+    suspend fun update(book: Book) {
+        bookDao.update(book)
     }
 
-    fun deleteBook(book: Book) {
-        bookDao.deleteBook(book)
+    suspend fun delete(book: Book) {
+        bookDao.delete(book)
     }
 
-    fun clearBooks() {
-        bookDao.clearBooks()
-    }
-
-    fun getAllBooks(): LiveData<List<Book>> {
-        return bookDao.getAllBooks()
+    suspend fun deleteAll() {
+        bookDao.deleteAll()
     }
 }
+

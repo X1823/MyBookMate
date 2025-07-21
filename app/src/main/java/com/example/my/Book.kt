@@ -9,6 +9,6 @@ data class Book(
     val title: String,
     val author: String,
     val progress: Int,
-    val copy: String = "",
     val note: String
 )
+

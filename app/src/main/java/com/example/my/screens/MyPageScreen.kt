@@ -12,8 +12,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.my.BookViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -27,6 +25,7 @@ fun MyPageScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val books = bookViewModel.allBooks.value.orEmpty()
 
     Column(
         modifier = modifier
@@ -37,14 +36,14 @@ fun MyPageScreen(
     ) {
         Text("Username: Ryan", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Total Books Read: ${bookViewModel.allBooks.value.size}")
+        Text("Total Books Read: ${books.size}")
         Text("Current Reading Goals: 2025 Reading Plan", textAlign = TextAlign.Center)
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = {
-                exportReadingData(context, bookViewModel)
+                exportReadingData(context, books)
             },
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth()
@@ -57,7 +56,7 @@ fun MyPageScreen(
         Button(
             onClick = {
                 scope.launch {
-                    bookViewModel.clearBooks()
+                    bookViewModel.deleteAllBooks()  // ✅ 修复调用正确方法名
                 }
             },
             shape = RoundedCornerShape(16.dp),
@@ -73,13 +72,12 @@ fun MyPageScreen(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Toggle Dark Mode")
+            Text(if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode")
         }
     }
 }
 
-fun exportReadingData(context: Context, bookViewModel: BookViewModel) {
-    val books = bookViewModel.allBooks.value
+fun exportReadingData(context: Context, books: List<com.example.my.Book>) {
     val fileName = "reading_data.csv"
     val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName)
 
