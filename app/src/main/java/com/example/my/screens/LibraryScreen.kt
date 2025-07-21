@@ -17,7 +17,7 @@ import androidx.compose.runtime.livedata.observeAsState
 
 @Composable
 fun LibraryScreen(
-    modifier: Modifier = Modifier, // ✅ 新增这一行
+    modifier: Modifier = Modifier,
     bookViewModel: BookViewModel
 ) {
     val bookList by bookViewModel.allBooks.observeAsState(initial = emptyList())
@@ -30,7 +30,7 @@ fun LibraryScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         OutlinedTextField(
