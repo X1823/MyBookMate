@@ -15,6 +15,8 @@ import com.example.my.BookViewModel
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
+import androidx.compose.ui.graphics.Color
+import com.example.my.ui.theme.Purple80
 
 @Composable
 fun MyPageScreen(
@@ -46,6 +48,10 @@ fun MyPageScreen(
                 exportReadingData(context, books)
             },
             shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Purple80,
+                contentColor = Color.White
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Export Reading Data")
@@ -56,10 +62,14 @@ fun MyPageScreen(
         Button(
             onClick = {
                 scope.launch {
-                    bookViewModel.deleteAllBooks()  // ✅ 修复调用正确方法名
+                    bookViewModel.deleteAllBooks()
                 }
             },
             shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Purple80,
+                contentColor = Color.White
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Clear Reading History")
@@ -70,6 +80,10 @@ fun MyPageScreen(
         Button(
             onClick = onToggleTheme,
             shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Purple80,
+                contentColor = Color.White
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode")
@@ -96,6 +110,7 @@ fun exportReadingData(context: Context, books: List<com.example.my.Book>) {
         e.printStackTrace()
     }
 }
+
 
 
 

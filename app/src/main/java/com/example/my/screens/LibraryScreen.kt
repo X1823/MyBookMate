@@ -7,17 +7,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.my.Book
 import com.example.my.BookViewModel
-import com.example.my.ui.theme.Pink80
 import com.example.my.ui.theme.Purple80
 import com.example.my.ui.theme.PurpleGrey80
 import androidx.compose.runtime.livedata.observeAsState
 
 @Composable
 fun LibraryScreen(
-    modifier: Modifier = Modifier, // ✅ 新增这一行
+    modifier: Modifier = Modifier,
     bookViewModel: BookViewModel
 ) {
     val bookList by bookViewModel.allBooks.observeAsState(initial = emptyList())
@@ -30,7 +28,7 @@ fun LibraryScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         OutlinedTextField(
@@ -39,14 +37,10 @@ fun LibraryScreen(
             label = { Text("Title", color = Color.DarkGray) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = PurpleGrey80,
-                unfocusedBorderColor = PurpleGrey80,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                cursorColor = PurpleGrey80
+                unfocusedBorderColor = PurpleGrey80
             ),
             modifier = Modifier.fillMaxWidth()
         )
-
 
         OutlinedTextField(
             value = author,
@@ -108,11 +102,68 @@ fun LibraryScreen(
         Divider(modifier = Modifier.padding(vertical = 8.dp))
 
         bookList.forEach { book ->
+            var isEditing by remember { mutableStateOf(false) }
+            var updatedProgress by remember { mutableStateOf(book.progress.toString()) }
+            var updatedNote by remember { mutableStateOf(book.note) }
+
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                Text("Title: ${book.title}")
-                Text("Author: ${book.author}")
-                Text("Progress: ${book.progress}%")
-                Text("Note: ${book.note}")
+                Text("Title: ${book.title}", style = MaterialTheme.typography.titleMedium)
+                Text("Author: ${book.author}", style = MaterialTheme.typography.bodyMedium)
+
+                if (isEditing) {
+                    OutlinedTextField(
+                        value = updatedProgress,
+                        onValueChange = { updatedProgress = it },
+                        label = { Text("Progress") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = updatedNote,
+                        onValueChange = { updatedNote = it },
+                        label = { Text("Note") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Row(modifier = Modifier.padding(top = 4.dp)) {
+                        Button(
+                            onClick = {
+                                val newProgress = updatedProgress.toIntOrNull() ?: 0
+                                bookViewModel.updateBook(book.copy(progress = newProgress, note = updatedNote))
+                                isEditing = false
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Purple80)
+                        ) {
+                            Text("Save")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { isEditing = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                } else {
+                    Text("Progress: ${book.progress}%")
+                    Text("Note: ${book.note}")
+
+                    Row(modifier = Modifier.padding(top = 4.dp)) {
+                        Button(
+                            onClick = { isEditing = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = Purple80)
+                        ) {
+                            Text("Edit")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { bookViewModel.deleteBook(book) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        ) {
+                            Text("Delete")
+                        }
+                    }
+                }
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
             }
         }

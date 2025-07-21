@@ -11,4 +11,3 @@ data class Book(
     val progress: Int,
     val note: String
 )
-
