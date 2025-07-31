@@ -1,21 +1,27 @@
 package com.example.my
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+
+import android.os.Build
 import android.os.Bundle
+import android.Manifest
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.*
 import com.example.my.screens.LibraryScreen
-import com.example.my.screens.RecommendScreen
 import com.example.my.screens.MyPageScreen
+import com.example.my.screens.RecommendScreen
 import com.example.my.ui.theme.MyTheme
+import com.example.my.worker.ReminderWorker
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -23,6 +29,20 @@ class MainActivity : ComponentActivity() {
         val repository = BookRepository(bookDao)
         val factory = BookViewModelFactory(repository)
         val bookViewModel = ViewModelProvider(this, factory)[BookViewModel::class.java]
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
+        }
+
+        val immediateWorkRequest = OneTimeWorkRequestBuilder<ReminderWorker>().build()
+        WorkManager.getInstance(this).enqueue(immediateWorkRequest)
+
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<ReminderWorker>(24, TimeUnit.HOURS).build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "reading_reminder",
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
+        )
 
         var isDarkMode by mutableStateOf(false)
 
